@@ -1,0 +1,121 @@
+server:
+  port: 8080
+  url: http://192.168.0.109:8080/cmsport
+  title: cmsport
+  servlet:
+    context-path: /cmsport
+
+spring:
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML5
+    encoding: UTF-8
+    cache: false
+  main:
+    allow-bean-definition-overriding: true
+  servlet:
+    multipart:
+      max-file-size: 1GB
+      max-request-size: 1GB
+  datasource:
+    druid:
+      url: jdbc:mysql://127.0.0.1:3306/db_cloud_cmsport?useUnicode=true&characterEncoding=utf8&characterSetResults=utf8&autoReconnect=true&failOverReadOnly=false&useSSL=false
+      db-type: mysql
+      driver-class-name: com.mysql.jdbc.Driver
+      username: root
+      password: 123456
+      initial-size: 2
+      min-idle: 2
+      max-active: 5
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1 FROM DUAL
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 10
+      filter:
+        commons-log:
+          connection-logger-name: stat,wall,log4j
+        stat:
+          log-slow-sql: true
+          slow-sql-millis: 2000
+      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      use-global-data-source-stat: true
+
+# 数据库
+mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml
+  mapper-locations: classpath*:mybatis/mapper/**/*.xml
+
+# 文档
+swagger:
+  title: 接口文档
+  description: 爱运动接口文档
+  service-url: https://baidu.com/
+  version: 1.0
+  swagger-base-package: com.cm
+
+# 文件
+file:
+  uploadPath: /Users/wenc/Desktop/filetest
+  imageTypes: png,jpg,jpeg,gif,blob
+  videoTypes: mp4
+  audioTypes: mp3,wav,amr
+  fileTypes: doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar,apk,pdf
+  maxFileCount: 6
+
+# 安全
+security:
+  oauth2:
+    oauth-server: http://192.168.0.113:7001/usercenter
+    oauth-logout: ${security.oauth2.oauth-server}/logout?redirect_uri=${server.url}
+    client:
+      client-id: cf8efb04ac364c748b9140ce4a70bdfc
+      client-secret: N3dhbVFTOFZaN0d3YU42MDA5ZDJRVzhqZWc2c0t2ek9KNTZGZkxLQ0Y5WW1ac2wwZTJHWk5NbXh3L3h3U2c4Rg==
+      user-authorization-uri: ${security.oauth2.oauth-server}/oauth_client/authorize
+      access-token-uri: ${security.oauth2.oauth-server}/oauth_client/token
+      grant-type: authorization_code
+    resource:
+      jwt:
+        key-uri: ${security.oauth2.oauth-server}/oauth_client/token_key
+      token-info-uri: ${security.oauth2.oauth-server}/oauth_client/check_token
+      user-info-uri: ${security.oauth2.oauth-server}/user
+    authorization:
+      check-token-access: ${security.oauth2.oauth-server}/oauth_client/token_key
+
+api-path:
+  user-center: ${security.oauth2.oauth-server}
+
+# 访问控制
+access-control:
+  pass-paths:
+    - /index.html
+    - /logout.html
+    - /default.html
+    - /assets/**
+    - /route/file/downloadfile/**
+  save-paths:
+    - /**/save*/**
+    - /**/add*/**
+  delete-paths:
+    - /**/delete*/**
+    - /**/remove*/**
+  update-paths:
+    - /**/update*/**
+    - /**/edit*/**
+  query-paths:
+    - /**/get*/**
+    - /**/query*/**
+    - /**/find*/**
+    - /**/list*/**
+    - /**/count*/**
+
+# 日志
+logging:
+  level:
+    root: error
+    com.cm: debug
