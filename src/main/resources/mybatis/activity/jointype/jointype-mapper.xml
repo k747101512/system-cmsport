@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cm.cmsport.dao.jointype.IJoinTypeDao">
+
+    <resultMap id="joinTypeDTO" type="com.cm.cmsport.pojo.dtos.jointype.JoinTypeDTO">
+        <id column="join_type_id" property="joinTypeId"/>
+        <result column="type_name" property="typeName"/>
+        <result column="need_column" property="needColumn"/>
+    </resultMap>
+
+    <!-- 新增活动参加方式 -->
+    <insert id="saveJoinType" parameterType="map">
+        INSERT INTO gen_join_type(
+            join_type_id,
+            type_name,
+            need_column,
+            creator,
+            gmt_create,
+            modifier,
+            gmt_modified,
+            is_delete
+        ) VALUES(
+            #{joinTypeId},
+            #{typeName},
+            #{needColumn},
+            #{creator},
+            #{gmtCreate},
+            #{modifier},
+            #{gmtModified},
+            #{isDelete}
+        )
+    </insert>
+
+    <!-- 删除活动参加方式 -->
+    <update id="removeJoinType" parameterType="map">
+        UPDATE
+            gen_join_type
+        SET
+            is_delete = 1,
+            modifier = #{modifier},
+            gmt_modified = #{gmtModified}
+        WHERE
+            join_type_id IN
+        <foreach collection="joinTypeIds" index="index" open="(" separator="," close=")">
+            #{joinTypeIds[${index}]}
+        </foreach>
+    </update>
+
+    <!-- 删除活动参加方式（物理） -->
+    <update id="deleteJoinType" parameterType="map">
+        DELETE FROM
+            gen_join_type
+        WHERE
+            join_type_id IN
+        <foreach collection="joinTypeIds" index="index" open="(" separator="," close=")">
+            #{joinTypeIds[${index}]}
+        </foreach>
+    </update>
+
+    <!-- 修改活动参加方式 -->
+    <update id="updateJoinType" parameterType="map">
+        UPDATE
+            gen_join_type
+        SET
+        <if test="typeName != null and typeName != ''">
+            type_name = #{typeName},
+        </if>
+        <if test="needColumn != null and needColumn != ''">
+            need_column = #{needColumn},
+        </if>
+            modifier = #{modifier},
+            gmt_modified = #{gmtModified}
+        WHERE
+            join_type_id = #{joinTypeId}
+    </update>
+
+    <!-- 活动参加方式详情 -->
+    <select id="getJoinType" parameterType="map" resultMap="joinTypeDTO">
+        SELECT
+            t1.type_name,
+            t1.need_column,
+            t1.join_type_id
+        FROM
+            gen_join_type t1
+        WHERE
+            t1.is_delete = 0
+        <if test="joinTypeId != null and joinTypeId != ''">
+        AND
+            t1.join_type_id = #{joinTypeId}
+        </if>
+    </select>
+
+    <!-- 活动参加方式列表 -->
+    <select id="listJoinType" parameterType="map" resultMap="joinTypeDTO">
+        SELECT
+            t1.type_name,
+            t1.join_type_id
+        FROM
+            gen_join_type t1
+        WHERE
+            t1.is_delete = 0
+        <if test="keywords != null and keywords != ''">
+        AND (
+            t1.id LIKE CONCAT('%', #{keywords}, '%')
+            OR
+            t1.join_type_id LIKE CONCAT('%', #{keywords}, '%')
+            <!-- 这里添加其他条件 -->
+        )
+        </if>
+        <if test="startTime != null and startTime != ''">
+        AND
+            LEFT(t1.gmt_create, 10) <![CDATA[ >= ]]> #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+        AND
+            LEFT(t1.gmt_create, 10) <![CDATA[ <= ]]> #{endTime}
+        </if>
+        <if test="joinTypeIds != null and joinTypeIds.size > 0">
+        AND
+            t1.join_type_id IN
+            <foreach collection="joinTypeIds" index="index" open="(" separator="," close=")">
+            #{joinTypeIds[${index}]}
+            </foreach>
+        </if>
+    </select>
+
+    <!-- 活动参加方式统计  -->
+    <select id="countJoinType" parameterType="map" resultType="Integer">
+        SELECT
+            COUNT(*)
+        FROM
+            gen_join_type t1
+        WHERE
+            t1.is_delete = 0
+    </select>
+
+</mapper>
